@@ -40,7 +40,7 @@ module.exports = {
                                     {
                                         // 要兼容的目标浏览器
                                         targets:{
-                                            "chrome": "58"
+                                            "chrome": "88"
 
                                         },
                                         // 设置corejs的版本，下载的版本几写几
