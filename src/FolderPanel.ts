@@ -12,21 +12,83 @@ const DRAG_ICON_CLASS = "DragIcon";
 
 
 export class FolderPanel {
+    
+    private panelElement: HTMLElement
+    private treePanel: TreePanel
+    private adapter: FileTreeAdapter
+    private rootHandle: FileSystemHandle | null = null
+    private onOpenFile: ((handle: FileSystemFileHandle)=>void) | null = null
+    // private onOpenFolder: null,
 
+    constructor(panel: string | HTMLElement = 'FolderPanel'){
+        if(panel instanceof HTMLElement) {
+            this.panelElement = panel
+        } else {
+            this.panelElement = document.getElementById(panel)!!    //throw
+        }
+        this.treePanel = new TreePanel(this.panelElement)
+        this.adapter = new FileTreeAdapter()
+        this.treePanel.setAdapter(this.adapter)
 
+        this.initNodeEventListener()
+        this.initContextMenu()
+        this.initDragListener()
 
+    }
+
+    private initNodeEventListener() {
+        this.treePanel.addNodeEventListener("dblclick", (path:string[], element: HTMLElement, event: Event) => {
+            this.adapter.isGroupP(path).then((isGroup) => {
+                if(isGroup) {
+                    this.treePanel.toggleFoldState(path)
+                } else {
+                    if(this.onOpenFile) {
+                        this.adapter.getItemP(path).then((handle)=> {
+                            if(handle instanceof FileSystemFileHandle && this.onOpenFile){
+                                this.onOpenFile(handle)
+                            }
+                        })
+                    }
+                }
+            })
+        })
+    }
+
+    private initContextMenu() {
+
+    }
+
+    private initDragListener() {
+        
+    }
+
+    setRoot(handle: FileSystemHandle) {
+        this.rootHandle = handle
+        this.adapter._rootHandle = handle
+        this.treePanel.showTree()
+    }
+
+    pickFolder() {
+        window.showDirectoryPicker().then((handle) => {
+            this.setRoot(handle)
+        });
+    }
+
+    setOnOpenFileListener(listener: (handle: FileSystemFileHandle)=>void) {
+        this.onOpenFile = listener
+    }
 
 }
 
 class FileTreeAdapter extends TreeAdapter {
-    private rootHandle: FileSystemHandle
-    constructor(rootHandle: FileSystemHandle) {
-        super()
-        this.rootHandle = rootHandle
-    }
+    _rootHandle: FileSystemHandle | null = null
+    // constructor(rootHandle: FileSystemHandle) {
+    //     super()
+    //     this.rootHandle = rootHandle
+    // }
 
     async getItemP(path: string[]): Promise<any> {
-        let handle: FileSystemHandle | null = this.rootHandle
+        let handle: FileSystemHandle | null = this._rootHandle
         for(let i = 0;i<path.length;i++) { 
             try{
                 handle = await (handle as FileSystemDirectoryHandle).getDirectoryHandle(path[i])
@@ -42,6 +104,7 @@ class FileTreeAdapter extends TreeAdapter {
     }
 
     async getChildrenNameP(path: string[]): Promise<string[]> {
+        console.log(path) //todo
         let dirNames = new Array<string>();
         let fileNames = new Array<string>();
         let groupHandle = (await this.getItemP(path)) as FileSystemDirectoryHandle
@@ -64,6 +127,7 @@ class FileTreeAdapter extends TreeAdapter {
     }
 
     async getContentElementP(path: string[]): Promise<HTMLElement> {
+        console.log(path) //todo
         let handle = await this.getItemP(path) as FileSystemHandle
 
         let contentView: HTMLElement = document.createElement("div");

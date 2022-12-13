@@ -9,3 +9,7 @@ interface HTMLElement {
 interface FileSystemDirectoryHandle {
     values(): Promise<FileSystemHandle>[]
 }
+
+interface Window {
+    showDirectoryPicker(): Promise<FileSystemHandle>
+}

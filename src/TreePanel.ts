@@ -18,7 +18,7 @@ export class TreePanel{
     protected panelElement: HTMLElement;
     protected treeContainer: HTMLElement;
     protected adapter: TreeAdapter;
-    protected listenerMap: Map<keyof ElementEventMap, (path:string[], element: HTMLElement, event: Event)=>void> 
+    protected listenerMap: Map<keyof HTMLElementEventMap, (path:string[], element: HTMLElement, event: Event)=>void> 
             = new Map()
 
     constructor(element: HTMLElement) {
@@ -38,6 +38,8 @@ export class TreePanel{
      * 更新指定节点，及子树
      */
     updateTree(path: string[]) {
+        console.log(this) //todo
+        console.log(path) //todo
         if(!this.adapter) {
             return
         }
@@ -60,7 +62,7 @@ export class TreePanel{
     insertNode(path: string[]) {
         if(path.length > 0) {
             let parentPath = path.slice(0, path.length-1)
-            this.adapter.isGroupP(parentPath).then(function(isGroup: boolean) {
+            this.adapter.isGroupP(parentPath).then((isGroup: boolean) => {
                 if(isGroup) {
                     let parentNodeElement = this.getNodeElement(parentPath)
                     if(parentNodeElement) {
@@ -85,7 +87,7 @@ export class TreePanel{
     remove(path: string[]) {
         if(path.length > 0) {
             let parentPath = path.slice(0, path.length-1)
-            this.adapter.isGroupP(parentPath).then(function(isGroup: boolean) {
+            this.adapter.isGroupP(parentPath).then((isGroup: boolean) => {
                 if(isGroup) {
                     let parentNodeElement = this.getNodeElement(parentPath)
                     if(parentNodeElement) {
@@ -112,13 +114,13 @@ export class TreePanel{
     }
 
     addNodeEventListener(
-        eventType: keyof ElementEventMap, 
+        eventType: keyof HTMLElementEventMap, 
         listener: (path:string[], element: HTMLElement, event: Event)=>void 
         ) {
             this.listenerMap.set(eventType, listener)
     }
 
-    removeNodeEventListener(eventType: keyof ElementEventMap) {
+    removeNodeEventListener(eventType: keyof HTMLElementEventMap) {
         this.listenerMap.delete(eventType)
     }
 
@@ -136,6 +138,13 @@ export class TreePanel{
         }
     }
 
+    toggleFoldState(path: string[]) {
+        let nodeElement = this.getNodeElement(path)
+        if(nodeElement) {
+            this._foldOrUnfold(nodeElement)
+        }
+    }
+
     showTree() {
         let rootElement = this.treeContainer.querySelector(`.${NODE_CLASS}`)
         if(rootElement) {
@@ -144,7 +153,7 @@ export class TreePanel{
         let path = new Array();
         let nodeElement = this.createNodeElement(path);
         this.treeContainer.appendChild(nodeElement);
-        this.adapter.isGroupP(path).then(function(isGroup: boolean) {
+        this.adapter.isGroupP(path).then((isGroup: boolean) => {
             if(isGroup) {
                 this.unfold(path);
             }
@@ -152,7 +161,7 @@ export class TreePanel{
     }
 
     protected _updateNode(path: string[], nodeElement: HTMLElement) {
-        this.adapter.getContentElementP(path).then(function(contentElement: HTMLElement){
+        this.adapter.getContentElementP(path).then((contentElement: HTMLElement) => {
             if(contentElement instanceof HTMLElement) {
                 let contentContainer = nodeElement.querySelector(`.${NODE_ITEM_CONTENT_CONTAINER_CLASS}`);
                 if(contentContainer){
@@ -174,7 +183,7 @@ export class TreePanel{
                 }
                 childrenView.removeChild(child)
             }
-            this.adapter.getChildrenNameP(path).then(function(childrenName){
+            this.adapter.getChildrenNameP(path).then((childrenName) => {
                 childrenName.forEach( (childName: string) => {
                     let childElement = tmpMap.get(childName)
                     if(childElement) {
@@ -203,7 +212,7 @@ export class TreePanel{
         let childrenView = document.createElement("div");
         childrenView.className = NODE_CHILDREN_CLASS;
         nodeElement.appendChild(childrenView);
-        this.adapter.getChildrenNameP(path).then(function(childrenName){
+        this.adapter.getChildrenNameP(path).then((childrenName) => {
             childrenName.forEach( (childName: string) => {
                 let childElement = this.createNodeElement(path.concat([childName]));
                 childrenView.appendChild(childElement);
@@ -234,13 +243,13 @@ export class TreePanel{
             element._treeNodeName = ""
         }
         element.classList.add(NODE_CLASS);
-        this.adapter.isGroupP(path).then(function(isGroup: boolean) {
+        this.adapter.isGroupP(path).then((isGroup: boolean) => {
             if(isGroup) {
                 element.classList.add(GROUP_NODE_CLASS)
                 this.fillGroupNodeElement(element, path)
             } else {
                 element.classList.add(LEAF_NODE_CLASS)
-                this.fillLeafNOdeElement(element, path)
+                this.fillLeafNodeElement(element, path)
             }
         })
         return element;
@@ -255,7 +264,7 @@ export class TreePanel{
                 </div>
             </div>
         `;
-        this.adapter.getContentElementP(path).then(function(contentElement: HTMLElement){
+        this.adapter.getContentElementP(path).then((contentElement: HTMLElement) => {
             let contentContainer = element.querySelector(`.${NODE_ITEM_CONTENT_CONTAINER_CLASS}`);
             contentContainer?.appendChild(contentElement);
         })
@@ -290,7 +299,7 @@ export class TreePanel{
                 </div>
             </div>
         `;
-        this.adapter.getContentElementP(path).then(function(contentElement: HTMLElement){
+        this.adapter.getContentElementP(path).then((contentElement: HTMLElement) => {
             let contentContainer = element.querySelector(`.${NODE_ITEM_CONTENT_CONTAINER_CLASS}`);
             contentContainer?.appendChild(contentElement);
         })
@@ -321,6 +330,9 @@ export class TreePanel{
                 break;
             }
             element = element.parentElement
+        }
+        if(path.length >  0) {
+            path.shift()    //删除根节点对应元素
         }
         return path
     }
@@ -403,26 +415,26 @@ export abstract class TreeAdapter {
 export abstract class SyncTreeAdapter extends TreeAdapter{
 
     getItemP(path: string[]): Promise<any> {
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
             resolve(this.getItem(path))
         })
     }
 
     getChildrenNameP(path: string[]): Promise<string[]> {
-        return new Promise(function(resolve, reject){
+        return new Promise((resolve, reject) => {
             resolve(this.getChildrenName(path))
         })
     }
 
     isGroupP(path: string[]): Promise<boolean> {
-        return new Promise(function(resolve, reject){
+        return new Promise((resolve, reject) => {
             resolve(this.isGroup(path))
         })
     }
 
     getContentElementP(path: string[]): Promise<HTMLElement> {
-        return new Promise(function(resolve, reject){
-            resolve(this.getChildNodeElement(path))
+        return new Promise((resolve, reject) => {
+            resolve(this.getContentElement(path))
         })
     }
     
