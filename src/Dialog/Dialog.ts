@@ -1,4 +1,4 @@
-
+import './Dialog.css'
 
 // 获取浏览器窗口的可视区域的宽度
 function getViewPortWidth(): number {

@@ -1,3 +1,5 @@
+import './TreePanel.css'
+
 const TREE_CONTAINER_CLASS = "TreeContainer";
 const NODE_CLASS = `TreeNode`;
 const GROUP_NODE_CLASS = `TreeGroupNode`;

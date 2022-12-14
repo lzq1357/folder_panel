@@ -9,7 +9,8 @@ module.exports = {
     entry: './src/index.ts',
     // 指定打包文件输出目录
     output: {
-        path: path.resolve(__dirname,'dist'), //'./dist' 使用path拼接完整路径
+        //path: path.resolve(__dirname,'dist'), //'./dist' 使用path拼接完整路径
+        path: path.resolve(__dirname,'D:\\software\\phpstudy_pro\\WWW\\local.klrs.xyz'), //'./dist' 使用path拼接完整路径
         // 打包后文件的名字
         filename: 'folder_panel.js', // 随意命名
         environment: {
@@ -62,6 +63,24 @@ module.exports = {
                 ],
                 exclude: /node_modules/, // 指定要排除的文件
                 
+            },
+            //css 处理这一块
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            //支持@important引入css
+                            importLoaders: 1
+                        }
+                    },
+                    {
+                        loader: 'postcss-loader'
+                        
+                    }
+                ]
             }
         ]
     },

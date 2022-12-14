@@ -1,4 +1,5 @@
-import { TreePanel, TreeAdapter } from "./TreePanel";
+import './FolderPanel.css'
+import { TreePanel, TreeAdapter } from "../TreePanel/TreePanel";
 
 const FILE_ITEM_CONTENT_CLASS = "FileItemContentView";
 const FILE_ITEM_ICON_CLASS = "FileItemIcon";

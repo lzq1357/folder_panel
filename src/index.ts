@@ -1,4 +1,4 @@
-import { FolderPanel } from "./FolderPanel";
+import { FolderPanel } from "./FolderPanel/FolderPanel";
 
 let folderPanel = new FolderPanel("FolderPanel")
 folderPanel.setOnOpenFileListener( (handle: FileSystemFileHandle)=> {
