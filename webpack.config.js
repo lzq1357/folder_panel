@@ -41,8 +41,8 @@ module.exports = {
                                     {
                                         // 要兼容的目标浏览器
                                         targets:{
-                                            "chrome": "88"
-
+                                            "chrome": "88",
+                                            "safari": "15.2"
                                         },
                                         // 设置corejs的版本，下载的版本几写几
                                         "corejs":3,
@@ -81,6 +81,13 @@ module.exports = {
                         
                     }
                 ]
+            },
+            {
+                test: /\.(ttf|woff|woff2?)$/,
+                type: 'asset/resource',
+                generator: {
+                  filename: 'resources/[hash:10][ext][query]'
+                }
             }
         ]
     },
