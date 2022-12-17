@@ -40,8 +40,6 @@ export class TreePanel{
      * 更新指定节点，及子树
      */
     updateTree(path: string[]) {
-        console.log(this) //todo
-        console.log(path) //todo
         if(!this.adapter) {
             return
         }
@@ -179,7 +177,7 @@ export class TreePanel{
         let tmpMap : Map<string, HTMLElement> = new Map()
         if(childrenView) {
             let child: any
-            for(child in childrenView.children){
+            for(child of childrenView.children){
                 if(child instanceof HTMLElement && child.classList.contains(NODE_CLASS)) {
                     tmpMap.set(child._treeNodeName, child)
                 }
@@ -341,8 +339,8 @@ export class TreePanel{
 
     protected getNodeElement(path: string[]): HTMLElement | null  {
         let element = this.treeContainer.querySelector(`.${NODE_CLASS}`)
-        let nodeName:String
-        for(nodeName in path) {
+        for(let i=0; i<path.length; i++) {
+            let nodeName = path[i];
             if(element instanceof HTMLElement) {
                 element = this.getChildNodeElement(element, nodeName)
             } else {
@@ -360,7 +358,7 @@ export class TreePanel{
         let childrenView = parentNodeElement.querySelector(`.${NODE_CHILDREN_CLASS}`)
         if(childrenView){
             let child: any
-            for(child in childrenView.children){
+            for(child of childrenView.children){
                 if(child instanceof HTMLElement 
                     && child.classList.contains(NODE_CLASS)
                     && child._treeNodeName == name) {

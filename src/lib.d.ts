@@ -10,6 +10,15 @@ interface FileSystemDirectoryHandle {
     values(): Promise<FileSystemHandle>[]
 }
 
+interface FileSystemFileHandle {
+    createWritable(): Promise<FileSystemWritableFileStream>
+}
+
+interface FileSystemWritableFileStream {
+    write(data)
+    close()
+}
+
 interface Window {
     showDirectoryPicker(): Promise<FileSystemHandle>
 }

@@ -4,14 +4,61 @@
     </head>
     <body>
         <div id="work_area">
-            <div id="FolderPanel" class="FolderPanel" style="width: 300px; height: 100%; background-color: #fafdff; height:500px; display:block;"></div>
-            <button id="btnPick">Pick</button>
-            <textarea id="editArea">Test</textarea>
+            <div id="FolderPanel" class="FolderPanel" ></div>
+            <div id="ContentArea">
+                <div id="OperationArea">
+                    <button id="btnPick" class="OperationButton">Pick</button>
+                    <button id="btnSave" class="OperationButton">Save</button>
+                    <button id="btnClose" class="OperationButton">Close</button>
+                </div>
+                <textarea id="EditArea">Test</textarea>
+            </div>
         </div> 
     </body>
-    <!-- <script>
-        window.onload=function(){
-            
-        };
-    </script> -->
+    <style type="text/css">
+        body, html {
+            height: 100%;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            overscroll-behavior: none;
+        }
+        #work_area {
+            display: flex;
+            box-sizing: border-box;
+            flex-grow: 1;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            padding: 2px;
+            width: 100%;
+            /* height: 100%; */
+            overflow: hidden;
+        }
+        #FolderPanel {
+            width: 240px; 
+            height: 100%; 
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: auto;
+            background-color: #fafdff;
+        }
+        #ContentArea {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        #OperationArea {
+            display: flex;
+            margin: 5px 0px;
+            align-items: center;
+        }
+        .OperationButton {
+            margin: 0px 5px;
+        }
+        #EditArea {
+            width: 100%;
+            flex-grow: 1;
+        }
+    </style>
 </html>

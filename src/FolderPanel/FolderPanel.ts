@@ -39,7 +39,9 @@ export class FolderPanel {
 
     private initNodeEventListener() {
         this.treePanel.addNodeEventListener("dblclick", (path:string[], element: HTMLElement, event: Event) => {
+            console.log("demo listener")  //todo
             this.adapter.isGroupP(path).then((isGroup) => {
+                console.log(isGroup) //todo
                 if(isGroup) {
                     this.treePanel.toggleFoldState(path)
                 } else {
@@ -105,7 +107,6 @@ class FileTreeAdapter extends TreeAdapter {
     }
 
     async getChildrenNameP(path: string[]): Promise<string[]> {
-        console.log(path) //todo
         let dirNames = new Array<string>();
         let fileNames = new Array<string>();
         let groupHandle = (await this.getItemP(path)) as FileSystemDirectoryHandle
@@ -128,7 +129,6 @@ class FileTreeAdapter extends TreeAdapter {
     }
 
     async getContentElementP(path: string[]): Promise<HTMLElement> {
-        console.log(path) //todo
         let handle = await this.getItemP(path) as FileSystemHandle
 
         let contentView: HTMLElement = document.createElement("div");
