@@ -132,7 +132,7 @@ div.FileItemContentView {
     top:0px;
     width: inherit;
     height: inherit;
-    background-color: #f8f8f860;
+    background-color: #00000072;
     display: -webkit-flex; /* Safari */
     display: flex;
     flex-direction: column;

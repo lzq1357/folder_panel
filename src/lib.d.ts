@@ -22,3 +22,7 @@ interface FileSystemWritableFileStream {
 interface Window {
     showDirectoryPicker(): Promise<FileSystemHandle>
 }
+
+interface DataTransferItem {
+    getAsFileSystemHandle(): FileSystemHandle
+}

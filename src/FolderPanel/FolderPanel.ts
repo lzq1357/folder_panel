@@ -62,7 +62,51 @@ export class FolderPanel {
     }
 
     private initDragListener() {
-        
+        this.panelElement.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            let dragContainer = this.panelElement.querySelector(`.${DRAG_CONTAINER_CLASS}`);
+            if(dragContainer instanceof HTMLElement) {
+                return;
+            }
+            dragContainer = document.createElement("div");
+            dragContainer.className = DRAG_CONTAINER_CLASS;
+            dragContainer.innerHTML = `<i class="${DRAG_ICON_CLASS} "></i>`;
+            dragContainer.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                this._hideDragContainer();
+            });
+            this.panelElement.appendChild(dragContainer);
+            let clickToHide = ( () => {
+                this._hideDragContainer();
+                window.removeEventListener("click", clickToHide)
+            })
+            window.addEventListener("click", clickToHide)
+        });
+        this.panelElement.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        this.panelElement.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            this._hideDragContainer();
+            let dataTransfer = e.dataTransfer
+            if(dataTransfer) {
+                for (const item of dataTransfer.items) {
+                    // kind will be 'file' for file/directory entries.
+                    if (item.kind == 'file') {
+                        const handle = await item.getAsFileSystemHandle();
+                        this.setRoot(handle);
+                        break;
+                    }
+                }
+            }
+        });
+    }
+
+    private _hideDragContainer() {
+        let dragContainer = this.panelElement.querySelector(`.${DRAG_CONTAINER_CLASS}`);
+        if(dragContainer instanceof HTMLElement) {
+            this.panelElement.removeChild(dragContainer);
+        }
     }
 
     setRoot(handle: FileSystemHandle) {
