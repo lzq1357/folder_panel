@@ -1,6 +1,7 @@
 const path = require('path') // node包里面的path模块，主要是为了帮我们拼接路径
 const HTMLWebpackPlugin = require('html-webpack-plugin')
 const {CleanWebpackPlugin} = require('clean-webpack-plugin')
+const fs = require('fs');
 
 // webpack中所有的配置信息都应该写在module.exports中
 module.exports = {
@@ -9,8 +10,7 @@ module.exports = {
     entry: './src/index.ts',
     // 指定打包文件输出目录
     output: {
-        //path: path.resolve(__dirname,'dist'), //'./dist' 使用path拼接完整路径
-        path: path.resolve(__dirname,'D:\\software\\phpstudy_pro\\WWW\\local.klrs.xyz'), //'./dist' 使用path拼接完整路径
+        path: path.resolve(__dirname,'dist'), //'./dist' 使用path拼接完整路径
         // 打包后文件的名字
         filename: 'folder_panel.js', // 随意命名
         environment: {
@@ -105,5 +105,15 @@ module.exports = {
      // 用来设置哪些可以作为模块引入
      resolve:{
         extensions:['.ts','.js'] //以ts、js为后缀的文件可以作为模块引入，打包不报错
+    },
+    //https相关，需自行配置域名、证书，系统hosts
+    devServer: {
+        host: "dev.lzq1357.site",
+        port: 8080,
+        https: {
+          key: fs.readFileSync(path.resolve(__dirname, "D:\\0other\\local_cert\\dev.lzq1357.site\\dev.lzq1357.site.key")),
+          cert: fs.readFileSync(path.resolve(__dirname, "D:\\0other\\local_cert\\dev.lzq1357.site\\dev.lzq1357.site.pem"))
+        },
     }
+    
 }
