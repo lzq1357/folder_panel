@@ -181,8 +181,8 @@ export class TreePanel{
                 if(child instanceof HTMLElement && child.classList.contains(NODE_CLASS)) {
                     tmpMap.set(child._treeNodeName, child)
                 }
-                childrenView.removeChild(child)
             }
+            childrenView.replaceChildren() //删除所有子元素
             this.adapter.getChildrenNameP(path).then((childrenName) => {
                 childrenName.forEach( (childName: string) => {
                     let childElement = tmpMap.get(childName)

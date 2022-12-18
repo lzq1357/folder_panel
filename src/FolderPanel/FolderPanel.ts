@@ -1,5 +1,6 @@
 import './FolderPanel.css'
 import { TreePanel, TreeAdapter } from "../TreePanel/TreePanel";
+import {Dialog} from "../Dialog/Dialog"
 
 const FILE_ITEM_CONTENT_CLASS = "FileItemContentView";
 const FILE_ITEM_ICON_CLASS = "FileItemIcon";
@@ -57,8 +58,173 @@ export class FolderPanel {
         })
     }
 
+    private menuUl: HTMLUListElement
+    private groupMenuMap = new Map()
+    private fileMenuMap = new Map()
     private initContextMenu() {
-
+        this.menuUl = document.createElement("ul");
+        this.menuUl.className = FILE_CONTEXT_MENU_CLASS;
+        this.treePanel.addNodeEventListener('contextmenu', ( (path: string[], element: HTMLElement, event:Event) => {
+            event.preventDefault();//preventDefault()阻止默认事件（这里阻止了默认菜单）
+            this.showContextMenu(path, element, event as MouseEvent);
+        }));
+       
+        this.addGroupMenuItem("新建文件", "icon-createfile",  async (path: string[], element: HTMLElement)=>{
+            this.adapter.getItemP(path).then((handle) => {
+                if(!(handle instanceof  FileSystemDirectoryHandle)) {
+                    throw "不能执行该操作";
+                }
+                Dialog.prompt("", "新建文件",  async (result)=> {
+                    let newName = result;
+                    if(newName == "") {
+                        throw "名称不能为空";
+                    }
+                    try{
+                        let existed = await handle.getFileHandle(newName, {create: false});
+                        if(existed != null) {
+                            alert("与已存在的文件重名");
+                        }
+                    } catch(err) {
+                        if(err.name == "TypeMismatchError"){
+                            alert("与已存在的文件重名");
+                        } else if(err.name != "NotFoundError") {
+                            throw err;
+                        } 
+                    }
+                    let subH = await handle.getFileHandle(newName, {create: true});
+                    if(subH instanceof FileSystemHandle) {
+                        this.treePanel.insertNode(path.concat([newName]))
+                        // if(this.onOpenFile != null) {
+                        //     this.onOpenFile(subH);
+                        // }
+                    }
+                });
+            })
+        });
+        this.addGroupMenuItem("新建文件夹", "icon-createfolder", async (path: string[], element: HTMLElement)=>{
+            this.adapter.getItemP(path).then((handle) => {
+                if(!(handle instanceof  FileSystemDirectoryHandle)) {
+                    throw "不能执行该操作";
+                }
+                Dialog.prompt("", "新建文件夹",  async (result)=> {
+                    let dirName = result;
+                    if(dirName == "") {
+                        throw "名称不能为空";
+                    }
+                    try{
+                        let existed = await handle.getFileHandle(dirName, {create: false});
+                        if(existed != null) {
+                            alert("与已存在的文件重名");
+                        }
+                    } catch(err) {
+                        if(err.name == "TypeMismatchError"){
+                            alert("与已存在的文件重名");
+                        } else if(err.name != "NotFoundError") {
+                            throw err;
+                        } 
+                    }
+                    let subH = await handle.getDirectoryHandle(dirName, {create: true});
+                    if(subH instanceof FileSystemHandle) {
+                        this.treePanel.insertNode(path.concat([dirName]))
+                    }
+                });
+            })
+        });
+        this.addGroupMenuItem("刷新", "icon-refresh", (path: string[], element: HTMLElement)=>{
+            this.treePanel.updateTree(path);
+        });
+        this.addGroupMenuItem("删除", "icon-remove", (path: string[], element: HTMLElement)=>{
+            if(path.length == 0) {
+                alert("不支持删除");
+            } else {
+                Dialog.confirm(
+                    `确定要删除文件夹"${path[path.length-1]}"，及全部内容吗？\r\n删除后无法找回！`,
+                    `删除`,
+                     async ()=>{
+                        let pPath = path.slice(0, path.length-1)
+                        let pHandle = await this.adapter.getItemP(pPath)
+                        pHandle.removeEntry(path[path.length-1], {recursive: true}).then( () => {
+                            this.treePanel.remove(path);
+                        })
+                    }
+                );
+            }
+        });
+        this.addFileMenuItem("打开", "icon-open", (path: string[], element: HTMLElement)=>{
+            this.adapter.getItemP(path).then( (handle) => {
+                if(handle instanceof FileSystemFileHandle && this.onOpenFile) {
+                    this.onOpenFile(handle)
+                }
+            })
+        });
+        this.addFileMenuItem("删除", "icon-remove", (path: string[], element: HTMLElement)=>{
+            if(path.length == 0) {
+                alert("不支持删除");
+            } else {
+                Dialog.confirm(
+                    `确定要删除文件"${path[path.length-1]}"吗？\r\n删除后无法找回！`,
+                    `删除`,
+                     async ()=>{
+                        let pPath = path.slice(0, path.length-1)
+                        let pHandle = await this.adapter.getItemP(pPath)
+                        pHandle.removeEntry(path[path.length-1], {recursive: true}).then( () => {
+                            this.treePanel.remove(path);
+                        })
+                    }
+                );
+            }
+        });
+    }
+    
+    private async showContextMenu(path: string[], element: HTMLElement, event:MouseEvent) {
+        let handle = await this.adapter.getItemP(path)
+        let menuUl = this.menuUl;
+        menuUl.innerHTML = "";
+        let itemMap ;
+        if(handle.kind === "directory"){
+            itemMap = this.groupMenuMap;
+        } else {
+            itemMap = this.fileMenuMap;
+        }
+        for (let item of itemMap.values()) {
+            let itemView = document.createElement("li");
+            itemView.className = FILE_CONTEXT_MENU_ITEM_CLASS;
+            itemView.innerHTML = `
+                <i class="${FILE_CONTEXT_MENU_ITEM_ICON_CLASS} ${item.icon}"></i>
+                ${item.name}
+            `;
+            itemView.onclick = ( () => { item.listener(path, element) } );
+            menuUl.appendChild(itemView);
+        }
+        let X = event.clientX;
+        if(X+menuUl.offsetWidth > document.body.clientWidth - 30) { //-30留些空余
+            X = X - menuUl.offsetWidth;
+        }
+        let Y = event.clientY;
+        if(Y+menuUl.offsetHeight > document.body.clientHeight - 30){
+            Y = Y - menuUl.offsetHeight;
+        }
+        menuUl.style.left=X+'px';
+        menuUl.style.top=Y+'px';
+        menuUl.style.display = "block";
+        this.panelElement.appendChild(menuUl);
+        let clickToHide = ( () => {
+            this.hideContextMenu();
+            window.removeEventListener("click", clickToHide)
+        })
+        window.addEventListener("click", clickToHide)
+    }
+    private addGroupMenuItem(name, icon, listener) {
+        this.groupMenuMap.set(name, new MenuItem(name, icon, listener));
+    }
+    private addFileMenuItem(name, icon, listener) {
+        this.fileMenuMap.set(name, new MenuItem(name, icon, listener));
+    }
+    private hideContextMenu() {
+        let menuUl = this.panelElement.querySelector(`.${FILE_CONTEXT_MENU_CLASS}`);
+        if(menuUl instanceof HTMLElement) {
+            this.panelElement.removeChild(menuUl);
+        }
     }
 
     private initDragListener() {
@@ -191,4 +357,16 @@ class FileTreeAdapter extends TreeAdapter {
         return contentView;
     }
 
+}
+
+class MenuItem {
+    name = null;
+    icon = null;
+    listener = null;
+
+    constructor(name, icon, listener) {
+        this.name = name;
+        this.icon = icon;
+        this.listener = listener;
+    }
 }
