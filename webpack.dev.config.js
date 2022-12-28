@@ -7,12 +7,12 @@ const fs = require('fs');
 module.exports = {
     mode: 'development',
     // 指定入口文件
-    entry: './src/FolderPanel/FolderPanel.ts',
+    entry: './src/index.ts',
     // 指定打包文件输出目录
     output: {
-        path: path.resolve(__dirname,'release'), //'./dist' 使用path拼接完整路径
+        path: path.resolve(__dirname,'dist'), //'./dist' 使用path拼接完整路径
         // 打包后文件的名字
-        filename: 'folder_panel.js', // 随意命名
+        filename: 'index.js', // 随意命名
         environment: {
             // 告诉webpack不使用箭头函数
             // arrowFunction: false
@@ -100,12 +100,27 @@ module.exports = {
     },
     // 配置webpack插件
     plugins:[
+        // new HTMLWebpackPlugin({  //如果不要求，直接new HTMLWebpackPlugin() ，如果需要设置标题，传入配置对象
+        //     title:'folder_panel_demo'
+        // }),
+        new HTMLWebpackPlugin({
+            template:'./src/index.html'
+        }),
         new CleanWebpackPlugin()
     ],
 
      // 用来设置哪些可以作为模块引入
      resolve:{
         extensions:['.ts','.js'] //以ts、js为后缀的文件可以作为模块引入，打包不报错
+    },
+    //https相关，需自行配置域名、证书，系统hosts
+    devServer: {
+        host: "dev.lzq1357.site",
+        port: 8080,
+        https: {
+          key: fs.readFileSync(path.resolve(__dirname, "D:\\0other\\local_cert\\dev.lzq1357.site\\dev.lzq1357.site.key")),
+          cert: fs.readFileSync(path.resolve(__dirname, "D:\\0other\\local_cert\\dev.lzq1357.site\\dev.lzq1357.site.pem"))
+        },
     }
     
 }
