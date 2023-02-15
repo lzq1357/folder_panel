@@ -21,6 +21,7 @@ export class FolderPanel {
     private rootHandle: FileSystemHandle | null = null
     private onOpenFile: ((handle: FileSystemFileHandle)=>void) | null = null
     // private onOpenFolder: null,
+    private onRootChanged:((oldRoot: FileSystemHandle | null, newRoot: FileSystemHandle| null)=>void) | null = null
 
     constructor(panel: string | HTMLElement = 'FolderPanel'){
         if(panel instanceof HTMLElement) {
@@ -276,9 +277,13 @@ export class FolderPanel {
     }
 
     setRoot(handle: FileSystemHandle) {
+        let oldRoot = this.rootHandle
         this.rootHandle = handle
         this.adapter._rootHandle = handle
         this.treePanel.showTree()
+        if(this.onRootChanged) {
+            this.onRootChanged(oldRoot, handle)
+        }
     }
 
     pickFolder() {
@@ -289,6 +294,10 @@ export class FolderPanel {
 
     setOnOpenFileListener(listener: (handle: FileSystemFileHandle)=>void) {
         this.onOpenFile = listener
+    }
+
+    setOnRootChangedListener(listener: (oldRoot: FileSystemHandle | null, newRoot: FileSystemHandle| null) => void) {
+        this.onRootChanged = listener;
     }
 
 }
